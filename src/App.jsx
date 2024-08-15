@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   BrowserRouter as Router,
   Routes,
   Link,
   Route,
   useParams,
+  useNavigate,
 } from 'react-router-dom'
 
 const Menu = () => {
@@ -92,6 +93,8 @@ const CreateNew = props => {
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
 
+  const navigate = useNavigate()
+
   const handleSubmit = e => {
     e.preventDefault()
     props.addNew({
@@ -100,6 +103,10 @@ const CreateNew = props => {
       info,
       votes: 0,
     })
+    props.setNotification(`a new anecdote ${content} created!`)
+    props.handleNotification()
+    // Once standard submit process is completed, navigate to root
+    navigate('/')
   }
 
   return (
@@ -155,6 +162,14 @@ const App = () => {
   ])
 
   const [notification, setNotification] = useState('')
+  const timeoutIdRef = useRef(null)
+
+  const handleNotification = () => {
+    console.log('initial timeoutId', timeoutIdRef.current)
+    clearTimeout(timeoutIdRef.current)
+    timeoutIdRef.current = setTimeout(() => setNotification(''), 5000)
+    console.log('after timeoutId', timeoutIdRef.current)
+  }
 
   const addNew = anecdote => {
     anecdote.id = Math.round(Math.random() * 10000)
@@ -179,9 +194,19 @@ const App = () => {
       <h1>Software anecdotes</h1>
       <Router>
         <Menu />
+        {notification && <p>{notification}</p>}
         <Routes>
           <Route path='/' element={<AnecdoteList anecdotes={anecdotes} />} />
-          <Route path='/create' element={<CreateNew addNew={addNew} />} />
+          <Route
+            path='/create'
+            element={
+              <CreateNew
+                addNew={addNew}
+                setNotification={setNotification}
+                handleNotification={handleNotification}
+              />
+            }
+          />
           <Route path='/about' element={<About />} />
           <Route
             path='/anecdotes/:id'
