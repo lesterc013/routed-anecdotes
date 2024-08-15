@@ -8,6 +8,7 @@ import {
   useNavigate,
   Outlet,
 } from 'react-router-dom'
+import { useField } from './hooks'
 
 const Menu = () => {
   const padding = {
@@ -92,18 +93,21 @@ const Footer = () => (
 )
 
 const CreateNew = props => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+  // useField(whatever) returns an object
+  // {reset, ...content} will spread into reset variable, and content object
+  // But we need to rename each individual reset since they are all the same name
+  const content = useField('content')
+  const { reset: authorReset, ...author } = useField('author')
+  const { reset: infoReset, ...info } = useField('info')
 
   const navigate = useNavigate()
 
   const handleSubmit = e => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0,
     })
     props.setNotification(`a new anecdote ${content} created!`)
@@ -119,28 +123,30 @@ const CreateNew = props => {
         <div>
           content
           <input
-            name='content'
-            value={content}
-            onChange={e => setContent(e.target.value)}
+            name={content.name}
+            value={content.value}
+            onChange={content.onChange}
           />
         </div>
         <div>
           author
-          <input
-            name='author'
-            value={author}
-            onChange={e => setAuthor(e.target.value)}
-          />
+          <input {...author} />
         </div>
         <div>
           url for more info
-          <input
-            name='info'
-            value={info}
-            onChange={e => setInfo(e.target.value)}
-          />
+          <input {...info} />
         </div>
-        <button>create</button>
+        <button type='submit'>create</button>
+        <button
+          type='button'
+          onClick={() => {
+            content.reset()
+            authorReset()
+            infoReset()
+          }}
+        >
+          reset
+        </button>
       </form>
     </div>
   )
