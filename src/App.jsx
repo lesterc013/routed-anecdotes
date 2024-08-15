@@ -6,6 +6,7 @@ import {
   Route,
   useParams,
   useNavigate,
+  Outlet,
 } from 'react-router-dom'
 
 const Menu = () => {
@@ -37,6 +38,8 @@ const AnecdoteList = ({ anecdotes }) => (
         </li>
       ))}
     </ul>
+
+    <Outlet />
   </div>
 )
 
@@ -196,17 +199,18 @@ const App = () => {
         <Menu />
         {notification && <p>{notification}</p>}
         <Routes>
-          <Route path='/' element={<AnecdoteList anecdotes={anecdotes} />} />
-          <Route
-            path='/create'
-            element={
-              <CreateNew
-                addNew={addNew}
-                setNotification={setNotification}
-                handleNotification={handleNotification}
-              />
-            }
-          />
+          <Route path='/' element={<AnecdoteList anecdotes={anecdotes} />}>
+            <Route
+              path='/create'
+              element={
+                <CreateNew
+                  addNew={addNew}
+                  setNotification={setNotification}
+                  handleNotification={handleNotification}
+                />
+              }
+            />
+          </Route>
           <Route path='/about' element={<About />} />
           <Route
             path='/anecdotes/:id'
